@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Java Flashcard Quiz</title>
+  <style>
+    body { font-family: Arial; background: #f0f8ff; text-align: center; padding: 30px; }
+    #card { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px #ccc; max-width: 600px; margin: auto; }
+    input[type="text"] { padding: 10px; width: 80%; margin: 15px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; margin: 10px; border: none; border-radius: 5px; background: #007bff; color: white; cursor: pointer; }
+    #result { font-weight: bold; margin-top: 10px; }
+    .correct { color: green; }
+    .wrong { color: red; }
+  </style>
+</head>
+<body>
+  <h2>Java Flashcard Quiz</h2>
+  <div id="card">
+    <div id="question">Click "Next" to begin</div>
+    <input type="text" id="userAnswer" placeholder="Type your answer here..." style="display:none;">
+    <br>
+    <button onclick="checkAnswer()" id="checkBtn" style="display:none;">Check Answer</button>
+    <div id="result"></div>
+    <button onclick="nextQuestion()" id="nextBtn">Next</button>
+  </div>
+
+  <script>
+    const flashcards = [
+      { q: "What is the default value of int in Java?", a: ["0", "zero"] },
+      { q: "How many types of primitive datatypes we have in Java?", a: ["8", "eight"] },
+      { q: "Keyword used to inherit a class?", a: ["extends"] },
+      { q: "Default value of boolean?", a: ["false"] },
+      { q: "Size of int in Java?", a: ["4 bytes", "four bytes"] },
+      { q: "Which class is used to take user input?", a: ["scanner", "system.in"] },
+      { q: "Keyword for constant?", a: ["final"] },
+      { q: "Access modifier most restrictive?", a: ["private"] },
+      { q: "Loop that executes at least once?", a: ["do-while", "do while", "dowhile"] },
+      { q: "Does Java support multiple inheritance?", a: ["no", "not with classes", "only with interfaces"] },
+      { q: "How does Java execute code?", a: ["line by line", "sequentially", "step by step", "interpreter", "compiler", "jit", "jre", "jdk", "jvm"] },
+      { q: "Which method starts Java program?", a: ["main", "main method", "public static void main"] },
+      { q: "Which operator compares values?", a: ["==", "equals", "double equals", "comparison", "relational"] },
+      { q: "Keyword to create a class?", a: ["class"] },
+      { q: "Where are static variables stored?", a: ["method area", "class area"] },
+      { q: "What is bytecode?", a: ["intermediate code", "not understandable by machine", "compiled java code", "platform independent code", "bridge between source and compiled code"] },
+      { q: "What is the default value of non-primitive data types in Java?", a: ["null"] },
+      { q: "Java variables are case sensitive?", a: ["yes", "true"] },
+      { q: "Which keyword is used for interface implementation?", a: ["implements"] },
+      { q: "Which block always executes in exception?", a: ["finally"] },
+      { q: "Which access modifier allows access in the same package?", a: ["default"] },
+      { q: "Which keyword calls parent class constructor?", a: ["super"] },
+      { q: "Which statement skips current iteration in loop?", a: ["continue"] },
+      { q: "Java code is written in which file extension?", a: [".java"] },
+      { q: "OOPJ stands for?", a: ["object oriented programming language"] }
+    ];
+
+    let current = -1;
+    let checked = false;
+
+    function normalize(str) {
+      return str.toLowerCase().replace(/[^a-z0-9.]+/g, "").trim();
+    }
+
+    function checkAnswer() {
+      if (current === -1) return;
+
+      const inputRaw = document.getElementById("userAnswer").value.trim();
+      if (!inputRaw) {
+        document.getElementById("result").innerHTML = "❗ Please enter an answer first.";
+        return;
+      }
+
+      const userAns = normalize(inputRaw);
+      const negatives = ["not", "no", "never", "wrong", "false", "can't", "cannot"];
+      const correctSet = flashcards[current].a.map(a => normalize(a));
+
+      let isNegative = negatives.some(word => userAns.includes(word));
+      let isCorrect = correctSet.some(ans => userAns.includes(ans));
+
+      // Exception: For boolean default value question, allow guessing words
+      if (flashcards[current].q.includes("boolean") && isCorrect) isNegative = false;
+
+      // NEW EXCEPTION: Allow "no" in multiple inheritance question
+      if (flashcards[current].q.toLowerCase().includes("multiple inheritance") && isCorrect) isNegative = false;
+
+      if (isCorrect && !isNegative) {
+        document.getElementById("result").innerHTML = "✅ <span class='correct'>Correct!</span>";
+      } else {
+        document.getElementById("result").innerHTML =
+          "❌ <span class='wrong'>Wrong!</span><br>✔ Correct Answer: " + flashcards[current].a[0];
+      }
+
+      checked = true;
+      document.getElementById("checkBtn").disabled = true;
+    }
+
+    function nextQuestion() {
+      if (current >= 0 && !checked) {
+        alert("❗ Please check your answer first.");
+        return;
+      }
+
+      current++;
+      if (current >= flashcards.length) {
+        document.getElementById("nextBtn").disabled = true;
+        document.getElementById("question").innerText = "🎉 Quiz Completed!";
+        document.getElementById("userAnswer").style.display = "none";
+        document.getElementById("checkBtn").style.display = "none";
+        document.getElementById("result").innerText = "Thanks for playing!";
+        return;
+      }
+
+      const card = flashcards[current];
+      document.getElementById("question").innerText = "Q" + (current + 1) + ": " + card.q;
+      document.getElementById("userAnswer").value = "";
+      document.getElementById("result").innerText = "";
+      document.getElementById("userAnswer").style.display = "inline-block";
+      document.getElementById("checkBtn").style.display = "inline-block";
+      document.getElementById("checkBtn").disabled = false;
+      document.getElementById("nextBtn").innerText = current === flashcards.length - 1 ? "Finish" : "Next";
+
+      checked = false;
+    }
+  </script>
+</body>
+</html>
